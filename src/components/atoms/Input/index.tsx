@@ -1,38 +1,61 @@
-import { TextField } from "@mui/material";
-import {
-  Controller,
-  type Control,
-  type FieldValues,
-  type Path,
-} from "react-hook-form";
+import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import styled from "styled-components";
 import { theme } from "../../../utils";
+import type { Airport } from "../../../interfaces";
+import { Fragment, useState } from "react";
+import { useAirportSearch } from "../../../hooks";
 
-interface IProps<T extends FieldValues> {
-  control: Control<T>;
-  name: Path<T>;
+interface IProps {
   label: string;
   error: string;
+  value?: Airport | null;
+  onSelect: (airport: Airport | null) => void;
 }
 
-const Input = <T extends FieldValues>({
-  control,
-  name,
-  label,
-  error,
-}: IProps<T>) => {
+const Input = ({ label, error, onSelect, value }: IProps) => {
+  const [input, setInput] = useState("");
+  const { data: options, isFetching } = useAirportSearch(input);
+
+  console.log(options);
   return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field }) => (
-        <InputWrapper className="input-wrapper">
-          <label>{label}</label>
-          <TextField variant="outlined" {...field} />
-          {error && <p className="error">{error}</p>}
-        </InputWrapper>
-      )}
-    />
+    <InputWrapper className="input-wrapper">
+      <label>{label}</label>
+      <Autocomplete<Airport, false, false, false>
+        fullWidth
+        autoHighlight
+        options={options?.data || []}
+        value={value}
+        filterOptions={(x) => x}
+        getOptionLabel={(opt) =>
+          opt ? `${opt?.presentation?.suggestionTitle}` : ""
+        }
+        loading={isFetching}
+        onInputChange={(_e, newInput) => setInput(newInput)}
+        onChange={(_e, newVal) => onSelect(newVal)}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="outlined"
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                endAdornment: (
+                  <Fragment>
+                    {isFetching ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null}
+                    {params.InputProps.endAdornment}
+                  </Fragment>
+                ),
+              },
+            }}
+          />
+        )}
+      />
+      {/* <TextField variant="outlined" {...field} />
+       */}
+      {error && <p className="error">{error}</p>}
+    </InputWrapper>
   );
 };
 
@@ -48,6 +71,10 @@ export const InputWrapper = styled.div`
     font-size: 13px;
     font-weight: 500;
     margin-bottom: 8px;
+  }
+  & .MuiAutocomplete-inputRoot {
+    padding: 1px 14px;
+    background: #eeeeee6b;
   }
 
   & .MuiPickersInputBase-adornedEnd:hover {
@@ -76,7 +103,6 @@ export const InputWrapper = styled.div`
 
   & input {
     padding: 10px 16px;
-    background: #eeeeee6b;
   }
 
   & fieldset {

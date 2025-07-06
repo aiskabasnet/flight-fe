@@ -6,3 +6,11 @@ export interface FlightSearchParams {
   currency?: string;
   adults?: number;
 }
+
+export interface Airport {
+  entityId: string;
+  presentation: {
+    suggestionTitle: string;
+  };
+  skyId: string;
+}

@@ -16,8 +16,8 @@ type IType = "one-way" | "round-trip";
 
 const formSchema = z.object({
   type: z.string().min(1, "Required!"),
-  from: z.string().min(1, "Required!"),
-  to: z.string().min(1, "Required!"),
+  from: z.any().optional(),
+  to: z.any().optional(),
   departure: z.string().min(1, "Required!"),
   return: z.string().min(1, "Required!"),
   passengers: z.number().min(1, "Required!"),
@@ -64,18 +64,18 @@ const Home = () => {
         <Flex>
           <Input
             label="Where From?"
-            control={control}
-            name="from"
-            error={errors.from?.message || ""}
+            onSelect={(value) => setValue("from", value)}
+            value={getValues("from")}
+            error={errors.from?.message?.toString() || ""}
           />
           <div className="swap">
             <ArrowLeftRight />
           </div>
           <Input
             label="Where To?"
-            control={control}
-            name="to"
-            error={errors.to?.message || ""}
+            onSelect={(value) => setValue("to", value)}
+            value={getValues("to")}
+            error={errors.to?.message?.toString() || ""}
           />
         </Flex>
 

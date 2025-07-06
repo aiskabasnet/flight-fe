@@ -1,10 +1,11 @@
-import axios from "axios";
+import axios, { type AxiosInstance } from "axios";
 
 // Create axios instance
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+const apiClient: AxiosInstance = axios.create({
+  baseURL: `https://${import.meta.env.VITE_RAPIDAPI_HOST}/api/v1`,
   headers: {
-    "Content-Type": "application/json",
+    "X-RapidAPI-Key": import.meta.env.VITE_RAPIDAPI_KEY,
+    "X-RapidAPI-Host": import.meta.env.VITE_RAPIDAPI_HOST,
   },
 });
 
