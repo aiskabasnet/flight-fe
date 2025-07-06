@@ -26,6 +26,7 @@ const Radios = <T extends FieldValues>({ control, name, items }: IProps<T>) => {
         <RadioGroup row {...field} className="radios">
           {items.map((item) => (
             <FormControlLabel
+              key={item.value}
               value={item.value}
               control={<Radio />}
               label={item.label}

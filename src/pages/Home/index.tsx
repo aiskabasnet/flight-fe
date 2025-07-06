@@ -31,11 +31,12 @@ const Home = () => {
     control,
     getValues,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: "one-way" as IType,
+      type: "round-trip" as IType,
       from: "",
       to: "",
       passengers: 1,
@@ -55,8 +56,8 @@ const Home = () => {
           control={control}
           name="type"
           items={[
-            { label: "One-way", value: "one-way" },
             { label: "Round-trip", value: "round-trip" },
+            { label: "One-way", value: "one-way" },
           ]}
         />
 
@@ -84,12 +85,14 @@ const Home = () => {
           label="Departure"
           error={errors.departure?.message || ""}
         />
-        <DatePicker
-          control={control}
-          name="return"
-          label="Return"
-          error={errors.return?.message || ""}
-        />
+        {watch("type") === "round-trip" && (
+          <DatePicker
+            control={control}
+            name="return"
+            label="Return"
+            error={errors.return?.message || ""}
+          />
+        )}
 
         <InputNumber
           value={getValues("passengers")}
