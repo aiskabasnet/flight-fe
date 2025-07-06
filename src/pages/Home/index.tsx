@@ -14,14 +14,31 @@ import { theme } from "../../utils";
 
 type IType = "one-way" | "round-trip";
 
-const formSchema = z.object({
-  type: z.string().min(1, "Required!"),
-  from: z.any().optional(),
-  to: z.any().optional(),
-  departure: z.string().min(1, "Required!"),
-  return: z.string().min(1, "Required!"),
-  passengers: z.number().min(1, "Required!"),
-});
+const formSchema = z
+  .object({
+    type: z.string().min(1, "Required!"),
+    from: z
+      .any()
+      .refine((val) => val && val.skyId, "Please select departure airport"),
+    to: z
+      .any()
+      .refine((val) => val && val.skyId, "Please select destination airport"),
+    departure: z.date().min(new Date(), "Departure date must be in the future"),
+    return: z.date().optional(),
+    passengers: z.number().min(1, "Required!"),
+  })
+  .refine(
+    (data) => {
+      if (data.type === "round-trip" && data.return) {
+        return data.return > data.departure;
+      }
+      return true;
+    },
+    {
+      message: "Return date must be after departure date",
+      path: ["return"],
+    }
+  );
 
 export type FormSchema = z.infer<typeof formSchema>;
 
@@ -44,14 +61,22 @@ const Home = () => {
   });
 
   const onSubmit = (data: FormSchema) => {
-    console.log(data);
+    // Convert dates to ISO strings for API calls if needed
+    const formData = {
+      ...data,
+      departure: data.departure.toISOString(),
+      return: data.return?.toISOString(),
+    };
+    console.log("Form data:", formData);
+    console.log("Original dates:", data.departure, data.return);
   };
 
+  console.log(getValues());
   return (
     <Wrapper>
       <h1>Flights</h1>
       <p>Book your flights to anywhere</p>
-      <Card className="shadow-md" onSubmit={handleSubmit(onSubmit)}>
+      <Card className="styled-card" onSubmit={handleSubmit(onSubmit)}>
         <Radios
           control={control}
           name="type"
@@ -152,11 +177,8 @@ const Wrapper = styled.div`
 `;
 
 const Card = styled.form`
-  padding: 2rem;
   max-width: 800px;
   margin: 1rem auto;
-  background-color: white;
-  border-radius: 10px;
   display: flex;
   flex-direction: column;
   gap: 1rem;

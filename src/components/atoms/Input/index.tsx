@@ -14,9 +14,9 @@ interface IProps {
 
 const Input = ({ label, error, onSelect, value }: IProps) => {
   const [input, setInput] = useState("");
-  const { data: options, isFetching } = useAirportSearch(input);
+  const [searchTerm, setSearchTerm] = useState("");
+  const { data: options, isFetching } = useAirportSearch(searchTerm);
 
-  console.log(options);
   return (
     <InputWrapper className="input-wrapper">
       <label>{label}</label>
@@ -30,7 +30,14 @@ const Input = ({ label, error, onSelect, value }: IProps) => {
           opt ? `${opt?.presentation?.suggestionTitle}` : ""
         }
         loading={isFetching}
-        onInputChange={(_e, newInput) => setInput(newInput)}
+        onInputChange={(_e, newInput) => {
+          setInput(newInput);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            setSearchTerm(input);
+          }
+        }}
         onChange={(_e, newVal) => onSelect(newVal)}
         renderInput={(params) => (
           <TextField
@@ -110,6 +117,8 @@ export const InputWrapper = styled.div`
   }
 
   & .error {
-    color: red;
+    color: ${theme.required};
+    font-size: 13px;
+    margin-top: 5px;
   }
 `;
