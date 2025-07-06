@@ -1,22 +1,20 @@
 import styled from "styled-components";
 import { theme } from "../../../utils";
-import { useState } from "react";
 
 interface FilterBarProps {
-  onSortByChange: (sortBy: "best" | "cheapest" | "fastest") => void;
+  onSortByChange: (sortBy: "best" | "price_high" | "fastest") => void;
+  sortBy: "best" | "price_high" | "fastest";
 }
 
-const FilterBar = ({ onSortByChange }: FilterBarProps) => {
-  const [sortBy] = useState<"best" | "cheapest" | "fastest">("best");
-
+const FilterBar = ({ onSortByChange, sortBy }: FilterBarProps) => {
   return (
     <>
-      <Card className="styled-card">
+      {/* <Card className="styled-card">
         <div className="heading">
           <p>Kathmandu to London</p>
           <span>5 flights found</span>
         </div>
-      </Card>
+      </Card> */}
 
       <Card className="styled-card">
         <div className="filter-bar">
@@ -27,8 +25,8 @@ const FilterBar = ({ onSortByChange }: FilterBarProps) => {
             Best
           </button>
           <button
-            onClick={() => onSortByChange("cheapest")}
-            className={sortBy === "cheapest" ? "active" : ""}
+            onClick={() => onSortByChange("price_high")}
+            className={sortBy === "price_high" ? "active" : ""}
           >
             Cheapest
           </button>
@@ -79,12 +77,19 @@ const Card = styled.div`
     justify-content: space-between;
     align-items: center;
 
-    & p {
-    }
-
     & span {
       color: ${theme.textSecondary};
       font-size: 14px;
+    }
+  }
+
+  @media (max-width: 375px) {
+    & .filter-bar {
+      flex-direction: column;
+
+      & button {
+        width: 100%;
+      }
     }
   }
 `;

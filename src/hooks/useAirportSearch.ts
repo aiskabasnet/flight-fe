@@ -7,6 +7,7 @@ export const useAirportSearch = (query: string) => {
     queryFn: () =>
       query.length < 2 ? [] : searchAirports(query).then((r) => r.data),
     enabled: !!query,
+    retry: false,
     staleTime: 1000 * 60 * 60,
   });
 };

@@ -6,7 +6,8 @@ export const useFlightSearch = (params: FlightSearchParams | null) => {
   return useQuery({
     queryKey: ["flights", params],
     queryFn: () => (params ? searchFlights(params).then((r) => r.data) : []),
-    enabled: !!params,
+    enabled: false,
+    retry: false,
     refetchOnWindowFocus: false,
   });
 };

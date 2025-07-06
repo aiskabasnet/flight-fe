@@ -1,28 +1,36 @@
 export interface FlightSearchParams {
   originSkyId: string;
   destinationSkyId: string;
-  departureDate: string;
+  date: string;
   returnDate?: string;
   currency?: string;
   adults?: number;
+  originEntityId: string;
+  destinationEntityId: string;
+  sortBy?: string;
+}
+
+interface CarrierLogo {
+  id: number;
+  name: string;
+  logoUrl: string;
+}
+
+interface Leg {
+  id: string;
+  origin: { id: string; name: string; displayCode: string; city: string };
+  destination: { id: string; name: string; displayCode: string; city: string };
+  departure: string; // ISO
+  arrival: string; // ISO
+  stopCount: number;
+  durationInMinutes: number;
+  carriers: { marketing: CarrierLogo[] };
 }
 
 export interface Itinerary {
   id: string;
-  price: {
-    amount: number;
-    currency: string;
-  };
-  segments: {
-    airlineName: string;
-    airlineLogo: string;
-    origin: string;
-    destination: string;
-    departureTime: string; // ISO
-    arrivalTime: string; // ISO
-    stops: number;
-    duration: string;
-  }[];
+  price: { raw: number; formatted: string };
+  legs: Leg[];
 }
 
 export interface Airport {

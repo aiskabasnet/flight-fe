@@ -4,8 +4,8 @@ import axios, { type AxiosInstance } from "axios";
 const apiClient: AxiosInstance = axios.create({
   baseURL: `https://${import.meta.env.VITE_RAPIDAPI_HOST}/api/v1`,
   headers: {
-    "X-RapidAPI-Key": import.meta.env.VITE_RAPIDAPI_KEY,
-    "X-RapidAPI-Host": import.meta.env.VITE_RAPIDAPI_HOST,
+    "x-rapidapi-key": import.meta.env.VITE_RAPIDAPI_KEY,
+    "x-rapidapi-host": import.meta.env.VITE_RAPIDAPI_HOST,
   },
 });
 

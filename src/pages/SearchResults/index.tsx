@@ -4,71 +4,73 @@ import { useMemo, useState } from "react";
 import { useFlightSearch } from "../../hooks";
 import styled from "styled-components";
 import { FilterBar, FlightCard } from "../../components";
+import { Skeleton } from "@mui/material";
 
 function parseSearchParams(search: URLSearchParams): FlightSearchParams | null {
-  const originSkyId = search.get("o");
-  const destinationSkyId = search.get("d");
-  const departureDate = search.get("dt");
+  const originSkyId = search.get("originSkyId");
+  const destinationSkyId = search.get("destinationSkyId");
+  const departureDate = search.get("departureDate");
+  const originEntityId = search.get("originEntityId");
+  const destinationEntityId = search.get("destinationEntityId");
 
-  if (!originSkyId || !destinationSkyId || !departureDate) return null;
+  if (
+    !originSkyId ||
+    !destinationSkyId ||
+    !departureDate ||
+    !originEntityId ||
+    !destinationEntityId
+  )
+    return null;
 
   return {
     originSkyId,
     destinationSkyId,
-    departureDate,
-    returnDate: search.get("rt") || undefined,
-    currency: search.get("c") || "USD",
-    adults: Number(search.get("a")) || 1,
+    date: departureDate,
+    returnDate: search.get("returnDate") || undefined,
+    currency: "USD",
+    adults: Number(search.get("adults")) || 1,
+    originEntityId,
+    destinationEntityId,
   } as FlightSearchParams;
 }
 
 const SearchResults = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const queryParams = parseSearchParams(searchParams);
 
-  const [nonStopOnly, setNonStopOnly] = useState<boolean>(false);
-  const [maxPrice, setMaxPrice] = useState<number | null>(null);
-  const [selectedAirlines, setSelectedAirlines] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<"best" | "cheapest" | "fastest">("best");
-  const {
-    data: itineraries = [],
-    isLoading,
-    isFetching,
-    error,
-  } = useFlightSearch(queryParams);
+  const [sortBy, setSortBy] = useState<"best" | "price_high" | "fastest">(
+    "best"
+  );
+  const { data, isLoading, isFetching } = useFlightSearch(
+    queryParams ? { ...queryParams, sortBy } : null
+  );
 
-  const availableAirlines = useMemo(() => {
-    const set = new Set<string>();
-    itineraries.forEach((it: Itinerary) => {
-      it.segments.forEach((seg) => set.add(seg.airlineName));
-    });
-    return Array.from(set).sort();
-  }, [itineraries]);
-
-  const filteredItineraries = useMemo(() => {
-    return itineraries.filter((it: Itinerary) => {
-      if (nonStopOnly && it.segments.some((seg) => seg.stops > 0)) return false;
-      if (maxPrice != null && it.price.amount > maxPrice) return false;
-      if (
-        selectedAirlines.length &&
-        !it.segments.some((seg) => selectedAirlines.includes(seg.airlineName))
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [itineraries, nonStopOnly, maxPrice, selectedAirlines]);
+  const itineraries = useMemo(
+    () => data?.data?.itineraries || [],
+    [data?.data?.itineraries]
+  );
 
   return (
     <Wrapper>
-      <FilterBar onSortByChange={setSortBy} />
-
-      {filteredItineraries?.length > 0 ? (
-        filteredItineraries.map((it: Itinerary) => (
-          <FlightCard key={it.id} itinerary={it} />
-        ))
+      {isLoading || isFetching ? (
+        <div className="skeleton">
+          <Skeleton variant="rectangular" width={"100%"} height={100} />
+          <Skeleton variant="rectangular" width={"100%"} height={100} />
+          <Skeleton variant="rectangular" width={"100%"} height={100} />
+          <Skeleton variant="rectangular" width={"100%"} height={100} />
+        </div>
       ) : (
-        <div className="no-results">No results found</div>
+        <>
+          <FilterBar sortBy={sortBy} onSortByChange={setSortBy} />
+
+          {itineraries?.length > 0 ? (
+            itineraries.map((it: Itinerary) => (
+              <FlightCard key={it.id} itinerary={it} />
+            ))
+          ) : (
+            <div className="no-results">No results found</div>
+          )}
+        </>
       )}
     </Wrapper>
   );
@@ -81,6 +83,16 @@ const Wrapper = styled.div`
   margin-left: auto;
   margin-right: auto;
   padding: 20px;
+
+  & .skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    & .MuiSkeleton-pulse {
+      border-radius: 10px;
+    }
+  }
 
   & .no-results {
     text-align: center;

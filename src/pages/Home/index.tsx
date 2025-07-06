@@ -11,6 +11,8 @@ import {
 } from "../../components";
 import { ArrowLeftRight } from "lucide-react";
 import { theme } from "../../utils";
+import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 
 type IType = "one-way" | "round-trip";
 
@@ -24,25 +26,33 @@ const formSchema = z
       .any()
       .refine((val) => val && val.skyId, "Please select destination airport"),
     departure: z.date().min(new Date(), "Departure date must be in the future"),
-    return: z.date().optional(),
+    return: z.date().optional().nullable(),
     passengers: z.number().min(1, "Required!"),
   })
-  .refine(
-    (data) => {
-      if (data.type === "round-trip" && data.return) {
-        return data.return > data.departure;
-      }
-      return true;
-    },
-    {
-      message: "Return date must be after departure date",
-      path: ["return"],
+  .superRefine((val, ctx) => {
+    if (val.type === "round-trip" && !val.return) {
+      ctx.addIssue({
+        path: ["return"],
+        code: z.ZodIssueCode.custom,
+        message: "Return date is required for a round‑trip",
+      });
     }
-  );
+
+    // Extra guard: if both dates exist, return must be after departure
+    if (val.departure && val.return && val.return <= val.departure) {
+      ctx.addIssue({
+        path: ["return"],
+        code: z.ZodIssueCode.custom,
+        message: "Return date must be after departure",
+      });
+    }
+  });
 
 export type FormSchema = z.infer<typeof formSchema>;
 
 const Home = () => {
+  const navigate = useNavigate();
+
   const {
     handleSubmit,
     control,
@@ -61,17 +71,29 @@ const Home = () => {
   });
 
   const onSubmit = (data: FormSchema) => {
-    // Convert dates to ISO strings for API calls if needed
     const formData = {
-      ...data,
-      departure: data.departure.toISOString(),
-      return: data.return?.toISOString(),
+      originSkyId: data.from?.skyId,
+      destinationSkyId: data.to?.skyId,
+      departureDate: dayjs(data.departure).format("YYYY-MM-DD"),
+      returnDate: data.return ? dayjs(data.return).format("YYYY-MM-DD") : null,
+      adults: data.passengers,
+      originEntityId: data.from?.entityId,
+      destinationEntityId: data.to?.entityId,
     };
-    console.log("Form data:", formData);
-    console.log("Original dates:", data.departure, data.return);
+
+    // Filtering out null values for URLSearchParams
+    const searchParams = Object.fromEntries(
+      Object.entries(formData).filter(([, value]) => value !== null)
+    );
+
+    console.log(searchParams, data);
+
+    navigate(`/search-results?${new URLSearchParams(searchParams).toString()}`);
   };
 
-  console.log(getValues());
+  const departure = watch("departure");
+  const returnDate = watch("return");
+
   return (
     <Wrapper>
       <h1>Flights</h1>
@@ -89,8 +111,10 @@ const Home = () => {
         <Flex>
           <Input
             label="Where From?"
-            onSelect={(value) => setValue("from", value)}
-            value={getValues("from")}
+            onSelect={(value) => {
+              setValue("from", value, { shouldDirty: true });
+            }}
+            value={watch("from")}
             error={errors.from?.message?.toString() || ""}
           />
           <div className="swap">
@@ -98,8 +122,10 @@ const Home = () => {
           </div>
           <Input
             label="Where To?"
-            onSelect={(value) => setValue("to", value)}
-            value={getValues("to")}
+            onSelect={(value) => {
+              setValue("to", value, { shouldDirty: true });
+            }}
+            value={watch("to")}
             error={errors.to?.message?.toString() || ""}
           />
         </Flex>
@@ -109,12 +135,14 @@ const Home = () => {
           name="departure"
           label="Departure"
           error={errors.departure?.message || ""}
+          maxDate={returnDate ? dayjs(returnDate) : undefined}
         />
         {watch("type") === "round-trip" && (
           <DatePicker
             control={control}
             name="return"
             label="Return"
+            minDate={departure ? dayjs(departure) : dayjs().startOf("day")}
             error={errors.return?.message || ""}
           />
         )}
@@ -156,9 +184,19 @@ const Flex = styled.div`
   & .input-wrapper {
     flex: 1;
   }
+
+  @media (max-width: 575px) {
+    flex-direction: column;
+    gap: 2rem;
+
+    & > .input-wrapper {
+      width: 100%;
+    }
+  }
 `;
 
 const Wrapper = styled.div`
+  margin: 0 2rem;
   & > h1 {
     text-align: center;
     margin-top: 30px;
@@ -191,5 +229,12 @@ const Card = styled.form`
     min-width: 300px;
     margin: 0px auto;
     min-height: 40px;
+  }
+
+  @media (max-width: 575px) {
+    & > button {
+      min-width: 100%;
+      margin-top: 1rem;
+    }
   }
 `;

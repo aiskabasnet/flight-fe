@@ -2,22 +2,26 @@ import styled from "styled-components";
 import type { Itinerary } from "../../../interfaces";
 import { Divider } from "@mui/material";
 import { Button } from "../../atoms";
+import dayjs from "dayjs";
 
 interface FlightCardProps {
   itinerary: Itinerary;
 }
 
 const FlightCard = ({ itinerary }: FlightCardProps) => {
-  const { price, segments } = itinerary;
-  const first = segments[0];
-  const last = segments[segments.length - 1];
+  const { price, legs } = itinerary;
 
-  function formatTime(iso: string) {
-    return new Date(iso).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+  const firstLeg = legs[0];
+  const lastLeg = legs[legs.length - 1];
+
+  const marketing = firstLeg.carriers.marketing[0];
+
+  const fmtTime = (iso: string) => dayjs(iso).format("h:mm A");
+
+  const totalMins = legs.reduce((m, leg) => m + leg.durationInMinutes, 0);
+  const duration = Math.floor(totalMins / 60) + "h " + (totalMins % 60) + "m";
+
+  const stops = legs.reduce((s, leg) => s + leg.stopCount, 0);
 
   return (
     <Card>
@@ -25,50 +29,41 @@ const FlightCard = ({ itinerary }: FlightCardProps) => {
         <div className="title">
           <div className="logo-wrapper">
             <img
-              src={
-                first?.airlineLogo ||
-                "https://logos.skyscnr.com/images/airlines/favicon/I%29.png"
-              }
-              alt={first?.airlineName}
+              src={marketing?.logoUrl}
+              alt={marketing?.name}
               width={30}
               height={30}
             />
           </div>
-          <p className="airline-name">
-            {first?.airlineName || "Norse Atlantic Airways (UK)"}
-          </p>
+          <p className="airline-name">{marketing?.name}</p>
         </div>
 
         <div className="row">
           <div className="item">
-            <div className="time">
-              {/* {formatTime(first.departureTime)} */}
-              6:00 AM
+            <div className="time">{fmtTime(firstLeg.departure)}</div>
+            <div className="place">
+              {firstLeg.origin.city} ({firstLeg.origin.displayCode})
             </div>
-            <div className="place">Los Anglees</div>
           </div>
 
           <Divider>
             <div className="duration">
-              <p>6h 30m</p>
-              <span>Non stop</span>
+              <p>{duration}</p>
+              <span>{stops === 0 ? "Non‑stop" : `${stops} stop`}</span>
             </div>
           </Divider>
 
           <div className="item">
-            <div className="time">
-              {/* {formatTime(first.departureTime)} */}
-              9:00 AM
-            </div>
+            <div className="time">{fmtTime(lastLeg.arrival)}</div>
 
-            <div className="place">Los Anglees</div>
+            <div className="place">
+              {lastLeg.destination.city} ({lastLeg.destination.displayCode})
+            </div>
           </div>
         </div>
       </div>
       <div className="right">
-        <div className="price">
-          {price.currency || "$"} {price.amount.toLocaleString() || "100"}
-        </div>
+        <div className="price">{price.formatted}</div>
         <Button>Select</Button>
       </div>
     </Card>
@@ -164,6 +159,17 @@ const Card = styled.div`
 
     & img {
       object-fit: contain;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  @media (max-width: 575px) {
+    & .row {
+      flex-direction: column;
     }
   }
 `;

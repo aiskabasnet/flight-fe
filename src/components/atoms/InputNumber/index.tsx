@@ -15,7 +15,7 @@ const InputNumber = ({ label, error, value, onChange }: IProps) => {
     <Wrapper className="input-wrapper">
       <label>{label}</label>
       <div className="buttons">
-        <button onClick={() => onChange(value - 1)}>
+        <button onClick={() => onChange(value - 1)} disabled={value === 1}>
           <Minus />
         </button>
         <span>{value}</span>
@@ -49,6 +49,10 @@ const Wrapper = styled(InputWrapper)`
       cursor: pointer;
       justify-content: center;
 
+      &:disabled {
+        background: #f1f1f1;
+        cursor: not-allowed;
+      }
       &:hover {
         border: 1px solid #225ce53b;
         opacity: 0.8;

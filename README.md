@@ -1,69 +1,55 @@
-# React + TypeScript + Vite
+# ✈️ Google Flights Clone
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple and responsive clone of Google Flights built with React. This project allows users to search for flights by selecting origin, destination, and travel dates. It integrates with a flight search API and offers a user-friendly interface.
 
-Currently, two official plugins are available:
+## 🔧 Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React** – Frontend library
+- **MUI (Material UI)** – Component library for UI elements
+- **MUI Date Picker** – For selecting travel dates
+- **Styled-Components** – CSS-in-JS for component styling
+- **Axios** – For API requests
+- **React Query** – For data fetching and caching
+- **Day.js** – Lightweight date utility for manipulating and formatting dates
 
-## Expanding the ESLint configuration
+## 🚀 Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Flight search by origin, destination, and date
+- Responsive design
+- Modern UI using Material UI
+- Clean and maintainable code with styled-components
+- Loading and error handling with React Query
+- Date manipulation and formatting using Day.js
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📦 Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+yarn install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Start the development server
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+yarn dev
+```
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🌐 API Configuration
+
+This project uses a flight search API (e.g., from RapidAPI). Create a `.env` file in the root directory and add your API key. Refer to `.env.example` file.
+
+## 📁 Project Structure
+
+```txt
+src/
+├── assets/          # Static assets (images, icons)
+├── components/      # Reusable UI components
+├── features/        # Domain-specific modules
+├── hooks/           # Custom hooks
+├── pages/           # Route-level components
+├── providers/       # App-level context providers
+├── routes/          # App routing
+├── services/        # API calls
+├── styles/          # Global styles and theme setup
+├── utils/           # Helper utility functions
+└── main.tsx         # Entry point
 ```
